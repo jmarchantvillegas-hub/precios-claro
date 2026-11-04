@@ -81,13 +81,20 @@
     comuna.value=comunas.includes(cOld)?cOld:'';type.value=types.includes(tOld)?tOld:'';
     $('placeCounter').textContent=db.places.length;
   }
+  // "Almuerzos" es una ocasión de consumo, no solo la etiqueta comercial del local.
+  // Sándwiches, colaciones o platos vegetarianos también pueden servir para almorzar.
+  function matchesFoodType(r, selected){
+    if (!selected || r.type === selected) return true;
+    if (selected !== 'Almuerzos' || r.type === 'Desayunos') return false;
+    return (r.menu || []).some(d => isMeal(d) && ['plato','menu'].includes(normalize(d.category || '')));
+  }
   function filteredPlaces(){
     const q=normalize($('queryFilter').value.trim()), c=$('comunaFilter').value, t=$('typeFilter').value, budget=Number($('budgetFilter').value||Infinity);
     return db.places.filter(r => {
       const meal=cheapDish(r);
       if(!meal) return false;
       if(c && r.comuna!==c) return false;
-      if(t && r.type!==t) return false;
+      if(!matchesFoodType(r,t)) return false;
       if(dishTotal(meal)>budget) return false;
       if(geoOnly && distanceFor(r)>8) return false;
       if(q && !normalize([r.name,r.comuna,r.sector,r.type,r.description,...r.menu.map(d=>d.name)].join(' ')).includes(q)) return false;
@@ -99,6 +106,24 @@
     return `<article class="place-card"><div class="place-visual p${index%4}"><span class="food-emoji" aria-hidden="true">${html(r.emoji||'🍽️')}</span><span class="card-status ${stat.className}">${html(stat.text)}</span></div>
       <div class="place-body"><div class="place-meta"><span class="meta-type">${html(r.type||'Comida')}</span><span>${html(r.comuna)}</span></div><h3>${html(r.name)}</h3><p class="place-description">${html(r.description||'Explora la carta disponible de este local.')}</p><div class="place-location">⌾ <span>${html(r.sector||r.comuna)}${html(distance)}</span></div><div class="price-box"><div><small>Comidas desde</small><strong>${money(dishTotal(meal))}</strong></div><div class="price-suffix">Total sin propina<br>Impuestos incluidos*</div></div><div class="place-actions"><button type="button" class="btn btn-primary" data-show-place="${html(r.id)}">Ver carta y precio ↗</button><a class="btn btn-outline map-btn" target="_blank" rel="noopener noreferrer" title="Ver sector referencial en Google Maps" aria-label="Ver sector de ${html(r.name)} en Google Maps" href="${html(googleSectorLink(r))}">⌖</a></div></div></article>`;
   }
+  // Ofrecer una alternativa sin inventar locales ni ignorar filtros a escondidas.
+  function suggestedAlternative(){
+    const candidates=[
+      {id:'typeFilter',label:'Ver otras opciones de comida'},
+      {id:'budgetFilter',label:'Ver sin límite de presupuesto'},
+      {id:'comunaFilter',label:'Buscar en otras comunas'},
+      {id:'queryFilter',label:'Quitar búsqueda por palabra'}
+    ];
+    for(const candidate of candidates){
+      const el=$(candidate.id);
+      if(!el.value) continue;
+      const original=el.value; el.value='';
+      const count=filteredPlaces().length;
+      el.value=original;
+      if(count>0) return {...candidate,count};
+    }
+    return null;
+  }
   function renderPlaces(){
     const matches=filteredPlaces();
     $('resultsGrid').innerHTML=matches.map(card).join('');
@@ -106,6 +131,14 @@
     $('emptyState').hidden=matches.length!==0;
     $('resultsCount').textContent=`${matches.length} ${matches.length===1?'local encontrado':'locales encontrados'}`;
     $('resultsTitle').textContent=geoOnly?'Opciones cercanas (aproximadas)':'Locales para explorar';
+    if(!matches.length){
+      const alternative=suggestedAlternative(), button=$('emptyTry');
+      $('emptyExplanation').textContent=alternative
+        ? `Con estos filtros exactos no hay coincidencias. Hay ${alternative.count} ${alternative.count===1?'local':'locales'} si ajustas una opción.`
+        : 'Aún no hay locales que cumplan esta combinación. Prueba limpiando los filtros.';
+      button.hidden=!alternative;
+      if(alternative){button.dataset.removeFilter=alternative.id;button.textContent=alternative.label+' ('+alternative.count+')';}
+    }
     return matches;
   }
   function clearFilters(){
@@ -464,6 +497,13 @@
   for (const id of ['queryFilter','budgetFilter','comunaFilter','typeFilter']) $(id).addEventListener(id==='queryFilter'?'input':'change',()=>{if(id==='comunaFilter'){geoOnly=false;userPosition=null;}renderPlaces();});
   $('clearFilters').addEventListener('click',clearFilters);
   $('emptyClear').addEventListener('click',clearFilters);
+  $('emptyTry').addEventListener('click',()=>{
+    const id=$('emptyTry').dataset.removeFilter;
+    if(!['typeFilter','budgetFilter','comunaFilter','queryFilter'].includes(id))return;
+    $(id).value='';
+    if(id==='comunaFilter'){geoOnly=false;userPosition=null;}
+    renderPlaces();
+  });
   $('geolocate').addEventListener('click',activateLocation);
   $('resultsGrid').addEventListener('click',e=>{const el=e.target.closest('[data-show-place]');if(el)openDetail(el.dataset.showPlace);});
   $('closeDetail').addEventListener('click',closeDetail);
