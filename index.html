@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#164e3d">
+  <meta name="description" content="Precios Claro: prototipo universitario para buscar comida económica y consultar precios finales sin sorpresas.">
+  <title>Precios Claro — Comer bien, pagar claro</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="datos.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js" defer></script>
+  <script type="module" src="cloud.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#explorar">Ir a buscar locales</a>
+  <div class="demo-strip">✦ PROTOTIPO UNIVERSITARIO · Todos los locales y precios son ficticios · Ningún sello representa una certificación real</div>
+  <header class="header">
+    <div class="container header-content">
+      <a class="brand" href="#inicio" aria-label="Precios Claro, inicio">
+        <span class="brand-icon" aria-hidden="true">$✓</span><span class="brand-name">precios<span>claro</span><small>COMER SIN SORPRESAS</small></span>
+      </a>
+      <nav class="header-nav" aria-label="Navegación principal"><a href="#explorar">Explorar</a><a href="#como-funciona">Cómo funciona</a></nav>
+      <span class="sync-pill" id="syncStatus" role="status">Modo demostración local</span>
+      <button type="button" id="openAdmin" class="btn btn-outline btn-small"><span aria-hidden="true">⚙</span> Panel editor</button>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero container" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="spark">✳</span> UNA INICIATIVA PARA JÓVENES</span>
+        <h1 id="heroTitle">Que el precio<br><em>no sea una sorpresa.</em></h1>
+        <p class="hero-text">Descubre opciones para comer con poco presupuesto, revisa sus cartas y conoce el <strong>total a pagar</strong> antes de salir.</p>
+        <div class="hero-buttons"><a class="btn btn-primary" href="#explorar">Encontrar dónde comer <span aria-hidden="true">↗</span></a><a class="btn btn-text" href="#como-funciona">Conoce el sello <span aria-hidden="true">→</span></a></div>
+        <div class="hero-foot"><span class="trust-symbol">✓</span><span>Precios desglosados</span><span class="dot">•</span><span>Propina siempre voluntaria</span></div>
+        <div class="hero-decoration" aria-hidden="true"><span class="orb orb-one"></span><span class="orb orb-two"></span></div>
+      </div>
+      <div class="chat" aria-labelledby="chatTitle">
+        <div class="chat-head"><div class="chat-avatar">✦</div><div><strong id="chatTitle">Asistente Precios Claro</strong><small><span class="online-dot"></span> Te ayudo a elegir dónde comer</small></div><button type="button" id="chatReset" class="icon-btn" title="Reiniciar conversación" aria-label="Reiniciar conversación">↻</button></div>
+        <div class="chat-messages" id="chatMessages" aria-live="polite" aria-relevant="additions"></div>
+        <div class="chat-actions" id="chatChoices"></div>
+        <div class="chat-bottom"><span class="mini-lock" aria-hidden="true">✳</span> Sin IA de pago · Solo datos registrados</div>
+      </div>
+    </section>
+
+    <section id="explorar" class="catalog">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow eyebrow-dark">DESCUBRE OPCIONES</span><h2>¿Qué se te antoja hoy?</h2><p>Busca según lo que quieres gastar, dónde estás y qué te gustaría comer.</p></div><div class="stat-bubble"><span id="placeCounter">8</span><small>locales de ejemplo</small></div></div>
+        <div class="filters" role="search" aria-label="Filtros de restaurantes">
+          <label class="field field-search"><span>Busca un local o plato</span><span class="input-icon"><span aria-hidden="true">⌕</span><input id="queryFilter" type="search" placeholder="Ej. almuerzo, arepa, vegetariano" autocomplete="off"></span></label>
+          <label class="field"><span>Comuna</span><select id="comunaFilter"><option value="">Todas las comunas</option></select></label>
+          <label class="field"><span>Presupuesto máximo</span><select id="budgetFilter"><option value="">Sin límite</option><option value="3000">Hasta $3.000</option><option value="4000">Hasta $4.000</option><option value="5000">Hasta $5.000</option><option value="7000">Hasta $7.000</option><option value="10000">Hasta $10.000</option></select></label>
+          <label class="field"><span>Tipo de comida</span><select id="typeFilter"><option value="">Todos los tipos</option></select></label>
+          <div class="filter-footer"><button type="button" id="geolocate" class="btn btn-outline btn-geo">◎ Usar mi ubicación</button><button type="button" id="clearFilters" class="btn btn-text">Limpiar filtros ↺</button><span class="filter-hint" id="geoStatus">La ubicación se usa solo en tu navegador. Los puntos del demo son aproximados.</span></div>
+        </div>
+        <div class="catalog-meta"><h3 id="resultsTitle">Locales para explorar</h3><span id="resultsCount">Cargando…</span></div>
+        <div class="cards" id="resultsGrid"></div>
+        <div id="emptyState" class="empty" hidden><div class="empty-emoji">🥣</div><h3>No hay resultados con esos filtros</h3><p>Prueba con otra comuna o un presupuesto más amplio.</p><button class="btn btn-primary" type="button" id="emptyClear">Mostrar todos</button></div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="info-section"><div class="container"><div class="section-heading info-title"><div><span class="eyebrow eyebrow-dark">TRANSPARENCIA PRIMERO</span><h2>¿Qué significa “Precios Claro”?</h2><p>La propuesta busca que los jóvenes puedan comparar precios de forma informada, sin cobros inesperados.</p></div></div>
+      <div class="info-grid">
+        <article class="info-card"><span class="info-icon">01 ↗</span><h3>Precio total visible</h3><p>Se informa el precio con impuestos y los cargos obligatorios registrados. La propina voluntaria se muestra aparte.</p></article>
+        <article class="info-card"><span class="info-icon">02 ↗</span><h3>Carta actualizable</h3><p>El editor permite añadir locales, cambiar platos, montos, disponibilidad y enlaces a sus cartas. Con Firebase conectado, se publican sin modificar GitHub.</p></article>
+        <article class="info-card"><span class="info-icon">03 ↗</span><h3>Verificación con respaldo</h3><p>Para un uso real, cada precio debe tener una fuente, fecha de revisión y proceso de validación.</p></article>
+      </div>
+      <div class="disclaimer"><span class="disclaimer-mark">!</span><p><strong>Importante:</strong> esta web es una demostración académica. Los restaurantes, ubicaciones estimadas, cartas, precios y sellos son ficticios. No tomes decisiones de compra basadas en estos ejemplos.</p></div>
+    </div></section>
+  </main>
+  <footer class="footer"><div class="container footer-content"><div><strong>precios<span>claro</span></strong><small>Proyecto universitario · Versión demostrativa</small></div><span>Comer bien también es saber cuánto vas a pagar. ♡</span><button type="button" id="footerAdmin" class="footer-admin">Editar datos ↗</button></div></footer>
+
+  <div class="overlay" id="detailOverlay" hidden><div class="backdrop" data-close="detail"></div><section class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><button type="button" class="modal-close" id="closeDetail" aria-label="Cerrar carta">✕</button><div id="detailContent"></div></section></div>
+
+  <div class="overlay admin-overlay" id="adminOverlay" hidden>
+    <div class="backdrop" data-close="admin"></div>
+    <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+      <div class="admin-head"><div>
+        <span class="eyebrow">PANEL DE EDICIÓN · PRECIOS CLARO</span>
+        <h2 id="adminTitle">Gestionar locales y cartas</h2>
+        <p id="adminInstructions">Si conectas Firebase, los cambios se guardarán en la nube y serán visibles para todos automáticamente.</p>
+      </div><button type="button" id="closeAdmin" class="modal-close admin-close" aria-label="Cerrar panel editor">✕</button></div>
+
+      <div id="adminGate" class="admin-gate" hidden>
+        <div class="admin-login-card">
+          <div class="gate-lock">🔐</div>
+          <h3>Acceso para editores</h3>
+          <p id="adminGateMessage">Solo el equipo autorizado puede modificar los precios publicados.</p>
+          <form id="adminLoginForm" class="login-form">
+            <label>Correo electrónico <input id="adminEmail" type="email" autocomplete="username" required placeholder="editor@ejemplo.cl"></label>
+            <label>Contraseña <input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Tu contraseña"></label>
+            <button class="btn btn-primary" type="submit" id="adminLoginButton">Entrar al panel</button>
+          </form>
+          <button type="button" id="unauthorizedLogout" class="btn btn-text" hidden>Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div id="adminContent">
+        <div class="editor-session" id="editorSession" hidden>
+          <span id="editorIdentity">Editor autorizado</span>
+          <button type="button" class="btn btn-outline btn-small" id="signOut">Cerrar sesión</button>
+        </div>
+        <div class="admin-toolbar">
+          <button type="button" class="btn btn-primary" id="seedCloud" hidden>☁ Publicar locales de ejemplo en Firebase</button>
+          <button type="button" class="btn btn-primary" id="exportJs">↓ Descargar datos.js (solo modo local)</button>
+          <button type="button" class="btn btn-outline" id="exportJson">↓ Respaldo JSON</button>
+          <label class="btn btn-outline file-btn" for="importJson">↑ Importar JSON<input id="importJson" type="file" accept="application/json,.json" hidden></label>
+          <button type="button" class="btn btn-text" id="restoreDemo">Restaurar datos publicados</button>
+        </div>
+        <p class="admin-alert" id="adminNotice">Los datos iniciales son ficticios. No marques un local como revisado sin verificar su carta.</p>
+        <div class="admin-workspace">
+          <aside class="admin-list-col"><div class="admin-list-head"><strong>Restaurantes</strong><button type="button" class="add-button" id="addPlace">+ Nuevo</button></div><div id="adminPlaceList" class="admin-list"></div></aside>
+          <div class="admin-edit-col" id="editorContent"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
