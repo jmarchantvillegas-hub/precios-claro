@@ -6,7 +6,7 @@ Esta versión añade **Firestore (datos compartidos en tiempo real)** y **Fireba
 
 - **Visitantes:** abren tu web, ven el catálogo online y las actualizaciones de precios sin recargar.
 - **Editores autorizados:** entran a **Panel editor**, ingresan su correo y contraseña, cambian platos/precios y pulsan **Guardar cambios**; la información se publica directamente en Firestore.
-- **Sin conectar Firebase:** la web sigue funcionando como demostración local. El panel permite editar en ese navegador; los cambios no se comparten.
+- **Sin conectar Firebase:** la web muestra el catálogo ficticio, pero la edición permanece bloqueada (no hay contraseña de demostración en el navegador).
 
 ## Paso 1. Crear un proyecto Firebase gratis
 
@@ -27,6 +27,18 @@ window.PRECIOS_CLARO_FIREBASE_CONFIG = {
 ```
 
 **No copies literalmente los valores `TU_…`: deben ser los que da tu consola. Nunca incluyas contraseñas, claves privadas, credenciales de cuentas de servicio, ni tokens en este archivo.**
+
+### Acceso con nombre de usuario `cristinix`
+
+Para entrar escribiendo únicamente `cristinix`, el proyecto utiliza internamente el correo de una cuenta real de Firebase Authentication.
+
+1. Crea en **Firebase Authentication → Usuarios** una cuenta con un correo que controles y una contraseña **nueva y privada**.
+2. En `firebase-config.js`, configura también `window.PRECIOS_CLARO_EDITOR_EMAIL = 'tu-correo-real@ejemplo.cl';` con **exactamente el mismo correo** de ese usuario.
+3. En el panel web podrás iniciar sesión como **`cristinix`** o escribiendo tu correo. El alias no sustituye Authentication: la contraseña se envía únicamente al sistema de Firebase.
+4. Copia el UID de ese usuario y crea en Firestore **`admins/UID`**, con `active` de tipo boolean y valor `true`. Sin este documento, podrás iniciar sesión pero **no editar**.
+5. Publica en **Firestore Database → Reglas** el archivo `firestore.rules` de este repositorio. Subirlo solo a GitHub no activa permisos.
+
+**Importante:** Nunca publiques la contraseña en GitHub ni la envíes por mensajes. Si ya la compartiste, usa otra nueva al crear la cuenta. El correo usado para el alias quedará visible en el JavaScript público; no incluyas un correo que necesites mantener secreto.
 
 ## Paso 2. Activar Firestore y colocar las reglas SEGURAS
 
