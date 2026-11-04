@@ -61,9 +61,9 @@
           <label class="field"><span>Tipo de comida</span><select id="typeFilter"><option value="">Todos los tipos</option></select></label>
           <div class="filter-footer"><button type="button" id="geolocate" class="btn btn-outline btn-geo">◎ Usar mi ubicación</button><button type="button" id="clearFilters" class="btn btn-text">Limpiar filtros ↺</button><span class="filter-hint" id="geoStatus">La ubicación se usa solo en tu navegador. Los puntos del demo son aproximados.</span></div>
         </div>
-        <div class="catalog-meta"><h3 id="resultsTitle">Locales para explorar</h3><span id="resultsCount">Cargando…</span></div>
+        <div class="catalog-meta"><h3 id="resultsTitle">Locales para explorar</h3><span id="resultsCount" aria-live="polite">Cargando…</span></div>
         <div class="cards" id="resultsGrid"></div>
-        <div id="emptyState" class="empty" hidden><div class="empty-emoji">🥣</div><h3>No hay resultados con esos filtros</h3><p>Prueba con otra comuna o un presupuesto más amplio.</p><button class="btn btn-primary" type="button" id="emptyClear">Mostrar todos</button></div>
+        <div id="emptyState" class="empty" hidden><div class="empty-emoji">🥣</div><h3>No hay resultados con esos filtros</h3><p id="emptyExplanation">Prueba con otra comuna o un presupuesto más amplio.</p><div class="empty-actions"><button class="btn btn-outline" type="button" id="emptyTry" hidden>Ver alternativas</button> <button class="btn btn-primary" type="button" id="emptyClear">Mostrar todos</button></div></div>
       </div>
     </section>
 
