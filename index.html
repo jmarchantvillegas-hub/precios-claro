@@ -53,7 +53,7 @@
 
     <section id="explorar" class="catalog">
       <div class="container">
-        <div class="section-heading"><div><span class="eyebrow eyebrow-dark">DESCUBRE OPCIONES</span><h2>¿Qué se te antoja hoy?</h2><p>Busca según lo que quieres gastar, dónde estás y qué te gustaría comer.</p></div><div class="stat-bubble"><span id="placeCounter">8</span><small>locales de ejemplo</small></div></div>
+        <div class="section-heading"><div><span class="eyebrow eyebrow-dark">DESCUBRE OPCIONES</span><h2>¿Qué se te antoja hoy?</h2><p>Busca según lo que quieres gastar, dónde estás y qué te gustaría comer.</p></div><div class="stat-bubble"><span id="placeCounter">—</span><small>locales de ejemplo</small></div></div>
         <div class="filters" role="search" aria-label="Filtros de restaurantes">
           <label class="field field-search"><span>Busca un local o plato</span><span class="input-icon"><span aria-hidden="true">⌕</span><input id="queryFilter" type="search" placeholder="Ej. almuerzo, arepa, vegetariano" autocomplete="off"></span></label>
           <label class="field"><span>Comuna</span><select id="comunaFilter"><option value="">Todas las comunas</option></select></label>
@@ -63,6 +63,7 @@
         </div>
         <div class="catalog-meta"><h3 id="resultsTitle">Locales para explorar</h3><span id="resultsCount" aria-live="polite">Cargando…</span></div>
         <div class="cards" id="resultsGrid"></div>
+        <div class="load-more-wrap"><button class="btn btn-outline" id="loadMorePlaces" type="button" hidden>Ver más locales</button></div>
         <div id="emptyState" class="empty" hidden><div class="empty-emoji">🥣</div><h3>No hay resultados con esos filtros</h3><p id="emptyExplanation">Prueba con otra comuna o un presupuesto más amplio.</p><div class="empty-actions"><button class="btn btn-outline" type="button" id="emptyTry" hidden>Ver alternativas</button> <button class="btn btn-primary" type="button" id="emptyClear">Mostrar todos</button></div></div>
       </div>
     </section>

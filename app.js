@@ -47,6 +47,7 @@
   let geoOnly = false;
   let toastTimer = null;
   let chatPhase = 'budget';
+  let visiblePlacesLimit = 12;
   let messages = [];
 
   function persist(){
@@ -126,7 +127,9 @@
   }
   function renderPlaces(){
     const matches=filteredPlaces();
-    $('resultsGrid').innerHTML=matches.map(card).join('');
+    $('resultsGrid').innerHTML=matches.slice(0,visiblePlacesLimit).map(card).join('');
+    $('loadMorePlaces').hidden=matches.length<=visiblePlacesLimit;
+    $('loadMorePlaces').textContent=`Ver más locales · ${Math.min(12,matches.length-visiblePlacesLimit)} siguientes`;
     $('resultsGrid').hidden=matches.length===0;
     $('emptyState').hidden=matches.length!==0;
     $('resultsCount').textContent=`${matches.length} ${matches.length===1?'local encontrado':'locales encontrados'}`;
@@ -142,6 +145,7 @@
     return matches;
   }
   function clearFilters(){
+    visiblePlacesLimit=12;
     $('queryFilter').value='';$('comunaFilter').value='';$('typeFilter').value='';$('budgetFilter').value='';
     geoOnly=false;userPosition=null;$('geoStatus').textContent='La ubicación se usa solo en tu navegador. Los puntos del demo son aproximados.';
     renderPlaces();
@@ -395,7 +399,7 @@
     $('adminPassword').disabled=!cloudConfigured || !cloudApi;
     $('adminLoginButton').disabled=cloudLoginPending || !cloudApi;
     if(cloudConfigured && cloudIsAdmin && !cloudHasCatalog){
-      alertAdmin('El catálogo online todavía está vacío. Pulsa “Publicar locales de ejemplo” para cargar los ocho restaurantes ficticios.');
+      alertAdmin('El catálogo online todavía está vacío. Pulsa “Publicar locales de ejemplo” para cargar el catálogo ficticio inicial.');
     }
     updatePreviewLabel();
   }
@@ -484,7 +488,7 @@
   });
   $('seedCloud').addEventListener('click',async()=>{
     if(cloudHasCatalog || !cloudReady || !cloudIsAdmin)return;
-    if(!window.confirm('¿Publicar los 8 restaurantes ficticios de ejemplo para todos los visitantes?'))return;
+    if(!window.confirm('¿Publicar los ${published.places.length} restaurantes ficticios de ejemplo para todos los visitantes?'))return;
     const next=clone(published);
     const saved=await publishOnline(next,0);
     if(!saved)return;
@@ -494,7 +498,8 @@
   });
 
   // Eventos
-  for (const id of ['queryFilter','budgetFilter','comunaFilter','typeFilter']) $(id).addEventListener(id==='queryFilter'?'input':'change',()=>{if(id==='comunaFilter'){geoOnly=false;userPosition=null;}renderPlaces();});
+  for (const id of ['queryFilter','budgetFilter','comunaFilter','typeFilter']) $(id).addEventListener(id==='queryFilter'?'input':'change',()=>{visiblePlacesLimit=12;if(id==='comunaFilter'){geoOnly=false;userPosition=null;}renderPlaces();});
+  $('loadMorePlaces').addEventListener('click',()=>{visiblePlacesLimit+=12;renderPlaces();});
   $('clearFilters').addEventListener('click',clearFilters);
   $('emptyClear').addEventListener('click',clearFilters);
   $('emptyTry').addEventListener('click',()=>{

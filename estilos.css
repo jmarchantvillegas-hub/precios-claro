@@ -61,3 +61,7 @@ body{background:var(--cream);letter-spacing:-.006em}
 
 /* Sugerencias de búsqueda cuando no hay coincidencias */
 .empty-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:19px}
+
+/* Catálogo de prueba ampliado: carga incremental de tarjetas */
+.load-more-wrap{display:flex;justify-content:center;margin:24px auto 12px}
+.load-more-wrap [hidden]{display:none!important}

@@ -59,7 +59,7 @@ window.PRECIOS_CLARO_FIREBASE_CONFIG = {
 1. En la web, pulsa **Panel editor** e inicia sesión con el correo y contraseña que creaste en Authentication.
 2. Si Firestore aún no tiene un catálogo, verás el botón **☁ Publicar locales de ejemplo en Firebase**. Púlsalo una sola vez.
 3. El indicador superior debe mostrar **«Catálogo online actualizado»**.
-4. Abre la misma URL desde **otro celular o una ventana privada**, sin iniciar sesión: ambos mostrarán los mismos ocho locales ficticios.
+4. Abre la misma URL desde **otro celular o una ventana privada**, sin iniciar sesión: ambos mostrarán los mismos 112 locales ficticios de prueba.
 5. En el primer navegador, entra al panel, cambia el precio de un plato de ejemplo y pulsa **Guardar cambios**.
 6. Comprueba que el otro dispositivo muestre el valor nuevo **automáticamente sin reemplazar archivos en GitHub**. También puedes agregar o eliminar locales y productos.
 
