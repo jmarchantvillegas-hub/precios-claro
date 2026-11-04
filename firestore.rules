@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Los visitantes pueden leer solo el catálogo público.
+    // Las escrituras requieren inicio de sesión y una autorización manual del equipo.
+    function isEditor() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+    }
+
+    match /public/catalog {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isEditor()
+        && request.resource.data.keys().hasOnly(['version', 'revision', 'updatedAt', 'places'])
+        && request.resource.data.version == 1
+        && request.resource.data.revision is int
+        && request.resource.data.places is list
+        && request.resource.data.places.size() <= 100;
+      allow delete: if false;
+    }
+
+    // Solo el propio usuario puede consultar si es editor.
+    // El documento de autorización se CREA MANUALMENTE en Firebase Console.
+    match /admins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
