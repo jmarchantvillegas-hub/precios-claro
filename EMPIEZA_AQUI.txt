@@ -1,0 +1,13 @@
+PRECIOS CLARO — VERSION CON ACTUALIZACION AUTOMATICA
+
+1. Lee GUIA_FIREBASE.md para conectar Firebase gratuitamente.
+2. Configura firebase-config.js con los datos de tu proyecto Firebase.
+3. Crea una base Firestore y publica las reglas incluidas en firestore.rules.
+4. Crea usuarios editores en Authentication y autorízalos en admins/UID.
+5. Sube esta nueva versión de los archivos a GitHub Pages.
+6. Abre el Panel editor, inicia sesión y publica los 8 ejemplos iniciales.
+7. Luego edita las cartas desde el panel; cada guardado actualiza la web para todos.
+
+SIN FIREBASE: abre index.html y podrás seguir probando todo en modo local.
+
+NO PUBLIQUES contraseñas ni claves privadas. Todos los restaurantes iniciales son FICTICIOS.
