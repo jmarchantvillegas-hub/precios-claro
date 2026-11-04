@@ -1,0 +1,64 @@
+# Precios Claro — web con actualización automática
+
+Prototipo universitario gratuito para recomendar restaurantes económicos, calcular precios finales sin propina obligatoria, y administrar locales y cartas desde un panel. La web incluye ocho restaurantes ficticios en Santiago.
+
+**IMPORTANTE:** Los locales, cartas, precios, fechas y sellos precargados son inventados. El sistema no comprueba automáticamente las cartas de comercios reales ni certifica a ningún restaurante.
+
+## Empieza aquí
+
+**Para que el panel publique cambios automáticamente para todos**, sigue **[GUIA_FIREBASE.md](GUIA_FIREBASE.md)**. La guía explica cómo:
+
+1. Crear un proyecto Firebase de plan gratuito.
+2. Crear la base Firestore y publicar las reglas de seguridad incluidas.
+3. Autorizar a los editores mediante Firebase Authentication y `admins/UID`.
+4. Copiar la configuración pública de Firebase a `firebase-config.js`.
+5. Subir esta versión de los archivos a GitHub Pages una sola vez.
+6. Entrar al panel, publicar los ocho ejemplos y luego cambiar precios en línea.
+
+No hay que pagar por un dominio ni instalar Node.js. La web sigue en la dirección gratuita de GitHub Pages.
+
+## Dos modos de operación
+
+| | Sin Firebase configurado | Con Firebase configurado |
+|---|---|---|
+| Búsqueda, cartas, filtro y chatbot | Sí | Sí |
+| Panel para editar restaurantes | Sí, modo local | Sí, con inicio de sesión |
+| Guardar precios | Solo en el navegador | En Firestore para todos |
+| Otros visitantes ven cambios | No, salvo publicación manual en GitHub | Sí, automáticamente |
+| Autenticación de editor | No | Sí, con permisos por UID |
+| Respaldo JSON | Sí | Sí |
+
+Para probar el modo local sin configuración, abre `index.html` o publica el proyecto en GitHub Pages. En modo local, el botón para exportar `datos.js` sigue disponible como método alternativo.
+
+## Funciones
+
+- Ocho restaurantes ficticios, cartas y precios de ejemplo.
+- Filtros por comuna, presupuesto máximo, tipo de comida y búsqueda por texto.
+- Chatbot guiado con botones, sin IA de pago.
+- Ubicación opcional desde el navegador para encontrar sectores cercanos; coordenadas de los ejemplos aproximadas.
+- Precio del plato con impuestos incluidos + cargos obligatorios registrados = total sin propina. Propina ilustrativa del 10 % calculada por separado.
+- Panel para crear, editar y eliminar locales o platos, modificar precios, disponibilidad, enlaces a cartas y fechas de verificación.
+- Estado ilustrativo o de revisión registrada, con vencimiento visual después de 30 días; no equivale a una auditoría independiente.
+- Sincronización con Firestore para visitantes conectados, sin recargar la web.
+- Copias de seguridad JSON y protección de conflictos cuando dos editores trabajan sobre versiones distintas.
+
+## Archivos
+
+| Archivo | Función |
+|---|---|
+| `index.html` | Página, chatbot, buscador, cartas y panel |
+| `estilos.css` | Estilos responsive |
+| `app.js` | Búsquedas, cálculos y administración |
+| `datos.js` | Datos ficticios de respaldo, visibles antes de la primera publicación en Firestore |
+| `firebase-config.js` | Configuración pública de Firebase; inicialmente en `null` |
+| `cloud.js` | Firestore en tiempo real y Authentication |
+| `firestore.rules` | Reglas que **debes copiar y publicar en Firebase Console** |
+| `GUIA_FIREBASE.md` | Instalación segura paso a paso |
+| `EMPIEZA_AQUI.txt` | Resumen breve |
+| `favicon.svg` | Icono del proyecto |
+
+## Precauciones
+
+El código fuente de GitHub Pages es público. **No publiques contraseñas, claves privadas, tokens o credenciales de servicio.** El objeto `firebaseConfig` del SDK web sí es público; la protección la proporcionan las reglas de Firestore y los permisos de los usuarios. Los campos de los locales publicados también serán públicos; no guardes datos personales ni notas internas privadas.
+
+En esta primera versión, el catálogo online se almacena como un solo documento Firestore. Es suficiente para un prototipo pequeño; para crecer mucho convendrá dividirlo en documentos por establecimiento y agregar auditoría de cambios.
