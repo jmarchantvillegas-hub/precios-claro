@@ -19,6 +19,37 @@ if (config && config.apiKey && config.projectId && config.appId) {
     let unsubscribeAuth = null;
     let loggedUser = null;
     let permitted = false;
+    let authCallback = null;
+
+    // Diagnóstico preciso de permisos, obtenido directamente del servidor.
+    // Nunca se guardan ni muestran contraseñas.
+    async function verifyEditorAccess(user) {
+      let permittedNow = false, error = '', status = 'signed-out', activeType = '';
+      if (user) {
+        try {
+          const editorRef = storeLib.doc(firestore, 'admins', user.uid);
+          const record = await storeLib.getDocFromServer(editorRef);
+          if (!record.exists()) {
+            status = 'missing';
+          } else {
+            const active = record.data()?.active;
+            activeType = typeof active;
+            if (active === true) { status = 'active'; permittedNow = true; }
+            else if (active === false) status = 'inactive';
+            else status = 'invalid-value';
+          }
+        } catch (e) {
+          status = 'read-error';
+          error = `${e?.code || 'error'}: ${friendlyError(e)}`;
+        }
+      }
+      if (auth.currentUser?.uid !== user?.uid) return;
+      permitted = permittedNow;
+      authCallback?.({
+        email: user?.email || '', uid: user?.uid || '', permitted: permittedNow,
+        error, status, activeType, projectId: config.projectId
+      });
+    }
 
     const messages = {
       'auth/invalid-credential': 'Correo o contraseña incorrectos.',
@@ -30,33 +61,31 @@ if (config && config.apiKey && config.projectId && config.appId) {
 
     window.PC_CLOUD = {
       start({onCatalog, onCatalogError, onAuth}) {
+        authCallback = onAuth;
         if (unsubscribeCatalog) unsubscribeCatalog();
         if (unsubscribeAuth) unsubscribeAuth();
         unsubscribeCatalog = storeLib.onSnapshot(catalogRef, snap => {
           onCatalog(snap.exists() ? snap.data() : null);
         }, onCatalogError);
-        unsubscribeAuth = authLib.onAuthStateChanged(auth, async (user) => {
+        unsubscribeAuth = authLib.onAuthStateChanged(auth, (user) => {
           loggedUser = user;
           permitted = false;
-          let error = '';
-          if (user) {
-            try {
-              // En las reglas, cada editor solo puede leer su propio registro de permiso.
-              const editorRef = storeLib.doc(firestore, 'admins', user.uid);
-              const record = await storeLib.getDoc(editorRef);
-              permitted = record.exists() && record.data()?.active === true;
-            } catch(e) { error = friendlyError(e); }
-          }
-          // Evita que una consulta anterior de permisos habilite una sesión ya cerrada.
-          if (auth.currentUser?.uid !== user?.uid) return;
-          onAuth({email:user?.email || '', uid:user?.uid || '', permitted, error});
-        }, error => onAuth({email:'', uid:'', permitted:false, error:friendlyError(error)}));
+          void verifyEditorAccess(user);
+        }, error => onAuth({
+          email:'', uid:'', permitted:false, error:friendlyError(error), status:'auth-error',
+          activeType:'', projectId:config.projectId
+        }));
       },
       async signIn(email, password) {
         try { await authLib.signInWithEmailAndPassword(auth, email, password); }
         catch (error) { throw new Error(friendlyError(error)); }
       },
       async signOut() { await authLib.signOut(auth); },
+      async recheckEditor() {
+        const user = auth.currentUser;
+        if (!user) throw new Error('Debes iniciar sesión antes de verificar los permisos.');
+        await verifyEditorAccess(user);
+      },
       async publish(nextCatalog, expectedRevision) {
         if (!loggedUser || !permitted || loggedUser.uid !== auth.currentUser?.uid) {
           throw new Error('Inicia sesión con una cuenta autorizada para publicar.');
