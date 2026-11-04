@@ -1,5 +1,6 @@
-/* Precios Claro — GitHub Pages + Firebase opcional.
- * Sin Firebase: edición local. Con Firebase: login + publicación online segura.
+/* Precios Claro — GitHub Pages con Firebase Authentication + Firestore.
+ * Sin Firebase: catálogo público de muestra, edición deshabilitada.
+ * Las contraseñas y permisos nunca se validan en este archivo.
  */
 (() => {
   'use strict';
@@ -31,13 +32,27 @@
   ));
 
   const cloudConfigured = Boolean(window.PRECIOS_CLARO_FIREBASE_CONFIG?.apiKey && window.PRECIOS_CLARO_FIREBASE_CONFIG?.projectId && window.PRECIOS_CLARO_FIREBASE_CONFIG?.appId);
+  // Alias visible para el equipo. El correo real y la contraseña se gestionan en Firebase.
+  const editorUsername = 'cristinix';
+  const editorEmail = String(window.PRECIOS_CLARO_EDITOR_EMAIL || '').trim();
+  const loginEmailFor = (input) => {
+    const login = String(input || '').trim();
+    if (normalize(login) === editorUsername) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editorEmail)) {
+        throw new Error('Falta asociar el usuario cristinix a un correo de Firebase en firebase-config.js.');
+      }
+      return editorEmail;
+    }
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) return login;
+    throw new Error('Ingresa cristinix o el correo autorizado de tu cuenta Firebase.');
+  };
   let db = clone(published);
   // Un borrador viejo no debe reemplazar el catálogo online.
   if (!cloudConfigured) {
     try { const saved=JSON.parse(localStorage.getItem(KEY)); if(validData(saved)) db=saved; } catch(e){ console.warn('No fue posible abrir el borrador.',e); }
   }
   let cloudApi = null, cloudReady = false, cloudHasCatalog = false, cloudRevision = 0;
-  let cloudIsAdmin = false, cloudEmail = '', cloudLoginPending = false;
+  let cloudIsAdmin = false, cloudEmail = '', cloudLoginPending = false, cloudLoginError = '';
   let editingRevision = 0;
   let activePlaceId = null;
   let selectedDishId = null;
@@ -379,7 +394,7 @@
     $('restoreDemo').hidden=true;
     $('seedCloud').hidden=!cloudConfigured || !cloudIsAdmin || !cloudReady || cloudHasCatalog;
     $('editorSession').hidden=!cloudConfigured || !cloudIsAdmin;
-    $('editorIdentity').textContent=cloudEmail ? `Editor: ${cloudEmail}` : 'Editor autorizado';
+    $('editorIdentity').textContent=cloudEmail ? (editorEmail && cloudEmail.toLowerCase()===editorEmail.toLowerCase() ? 'Editor: cristinix' : `Editor: ${cloudEmail}`) : 'Editor autorizado';
     $('adminInstructions').textContent=cloudConfigured
       ? 'Solo los editores autorizados pueden publicar cambios. Las cartas se actualizan para todos al guardar.'
       : 'El acceso de edición está bloqueado hasta conectar Firebase Authentication y activar las reglas de seguridad.';
@@ -391,8 +406,9 @@
     }else if(cloudEmail && !cloudIsAdmin){
       info.textContent=`La cuenta ${cloudEmail} inició sesión, pero no está autorizada para editar. Comprueba que en Firebase exista admins/{UID} con active = true.`;
     }else{
-      info.textContent='Ingresa con un usuario creado por tu equipo en Firebase Authentication. No está habilitado el registro público.';
+      info.textContent='Inicia sesión como cristinix o con el correo de un editor autorizado. Las cuentas se crean solo desde Firebase.';
     }
+    if (cloudConfigured && cloudLoginError) info.textContent=cloudLoginError;
     $('adminLoginForm').hidden=Boolean(cloudEmail && !cloudIsAdmin);
     $('unauthorizedLogout').hidden=!cloudEmail || cloudIsAdmin;
     $('adminEmail').disabled=!cloudConfigured || !cloudApi;
@@ -451,6 +467,7 @@
       },
       onAuth({email,permitted,error}){
         cloudEmail=email;cloudIsAdmin=Boolean(permitted);
+        if(cloudIsAdmin) cloudLoginError='';
         if(error)alertAdmin('Error al comprobar permisos de editor: '+error);
         if(!cloudIsAdmin)editing=null;
         refreshCloudUi();
@@ -471,14 +488,20 @@
   }
   $('adminLoginForm').addEventListener('submit',async e=>{
     e.preventDefault();if(!cloudApi)return;
+    cloudLoginError='';
+    let email;
+    try { email=loginEmailFor($('adminEmail').value); }
+    catch(error) { cloudLoginError=error.message;refreshCloudUi();return; }
     cloudLoginPending=true;refreshCloudUi();
     try{
-      await cloudApi.signIn($('adminEmail').value.trim(),$('adminPassword').value);
-      $('adminPassword').value='';
+      await cloudApi.signIn(email,$('adminPassword').value);
     }catch(error){
-      $('adminGateMessage').textContent=error.message;
+      cloudLoginError=error.message;
       showToast(error.message,true);
-    }finally{cloudLoginPending=false;refreshCloudUi();}
+    }finally{
+      $('adminPassword').value='';
+      cloudLoginPending=false;refreshCloudUi();
+    }
   });
   $('signOut').addEventListener('click',async()=>{
     try{await cloudApi?.signOut();editing=null;}catch(e){showToast(e.message,true);}
