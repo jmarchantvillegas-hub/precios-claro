@@ -17,7 +17,7 @@ service cloud.firestore {
         && request.resource.data.version == 1
         && request.resource.data.revision is int
         && request.resource.data.places is list
-        && request.resource.data.places.size() <= 100;
+        && request.resource.data.places.size() <= 250;
       allow delete: if false;
     }
 
