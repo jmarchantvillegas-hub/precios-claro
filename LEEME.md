@@ -62,3 +62,12 @@ Para probar el modo local sin configuración, abre `index.html` o publica el pro
 El código fuente de GitHub Pages es público. **No publiques contraseñas, claves privadas, tokens o credenciales de servicio.** El objeto `firebaseConfig` del SDK web sí es público; la protección la proporcionan las reglas de Firestore y los permisos de los usuarios. Los campos de los locales publicados también serán públicos; no guardes datos personales ni notas internas privadas.
 
 En esta primera versión, el catálogo online se almacena como un solo documento Firestore. Es suficiente para un prototipo pequeño; para crecer mucho convendrá dividirlo en documentos por establecimiento y agregar auditoría de cambios.
+
+
+## Actualización de identidad y acceso (noviembre de 2026)
+
+La sección «El sello» describe la propuesta de adhesión voluntaria de locales, transparencia del precio total y revisión periódica, no las funciones internas del software. Todos los restaurantes iniciales son ficticios.
+
+**Edición restringida:** el panel exige una cuenta de Firebase Authentication (correo y contraseña) y autorización del UID en `admins/{uid}` con `active: true`. Sin Firebase configurado, los campos de edición están bloqueados; el público puede seguir explorando locales de muestra. **No se ha creado ninguna contraseña predeterminada**, ni debe ponerse una contraseña en el código público de GitHub. Configura primero Authentication, Firestore y sus reglas según `GUIA_FIREBASE.md`.
+
+El permiso de escritura se valida en `firestore.rules`, no solo ocultando botones. La publicación de las reglas debe hacerse desde la consola de Firebase, ya que GitHub Pages no despliega reglas de Firestore.

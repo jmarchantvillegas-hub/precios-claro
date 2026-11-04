@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#164e3d">
-  <meta name="description" content="Precios Claro: prototipo universitario para buscar comida económica y consultar precios finales sin sorpresas.">
+  <meta name="theme-color" content="#153f31">
+  <meta name="description" content="Precios Claro: una iniciativa para que jóvenes conozcan el costo final de comer fuera antes de elegir. Explora cartas, presupuestos y locales participantes.">
   <title>Precios Claro — Comer bien, pagar claro</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="estilos.css">
@@ -15,35 +15,41 @@
 </head>
 <body>
   <a class="skip-link" href="#explorar">Ir a buscar locales</a>
-  <div class="demo-strip">✦ PROTOTIPO UNIVERSITARIO · Todos los locales y precios son ficticios · Ningún sello representa una certificación real</div>
+  <div class="demo-strip" role="note"><span class="pilot-dot" aria-hidden="true"></span><span id="demoNote">Iniciativa en etapa piloto <span class="strip-separator">·</span> Locales y precios de ejemplo, no verificados</span></div>
   <header class="header">
     <div class="container header-content">
       <a class="brand" href="#inicio" aria-label="Precios Claro, inicio">
         <span class="brand-icon" aria-hidden="true">$✓</span><span class="brand-name">precios<span>claro</span><small>COMER SIN SORPRESAS</small></span>
       </a>
-      <nav class="header-nav" aria-label="Navegación principal"><a href="#explorar">Explorar</a><a href="#como-funciona">Cómo funciona</a></nav>
+      <nav class="header-nav" aria-label="Navegación principal"><a href="#explorar">Explorar locales</a><a href="#como-funciona">El sello</a></nav>
       <span class="sync-pill" id="syncStatus" role="status">Modo demostración local</span>
-      <button type="button" id="openAdmin" class="btn btn-outline btn-small"><span aria-hidden="true">⚙</span> Panel editor</button>
+      <button type="button" id="openAdmin" class="btn btn-outline btn-small"><span aria-hidden="true">♙</span> Acceso equipo</button>
     </div>
   </header>
 
   <main id="inicio">
     <section class="hero container" aria-labelledby="heroTitle">
       <div class="hero-copy">
-        <span class="eyebrow"><span class="spark">✳</span> UNA INICIATIVA PARA JÓVENES</span>
-        <h1 id="heroTitle">Que el precio<br><em>no sea una sorpresa.</em></h1>
-        <p class="hero-text">Descubre opciones para comer con poco presupuesto, revisa sus cartas y conoce el <strong>total a pagar</strong> antes de salir.</p>
+        <span class="eyebrow"><span class="spark">✳</span> TU BOLSILLO TAMBIÉN TIENE VOZ</span>
+        <h1 id="heroTitle">Come rico.<br><em>Sin sorpresas.</em></h1>
+        <p class="hero-text">Elegir dónde comer debería ser fácil. Encuentra opciones que se ajusten a tu presupuesto y conoce <strong>el precio final antes de decidir</strong>.</p>
         <div class="hero-buttons"><a class="btn btn-primary" href="#explorar">Encontrar dónde comer <span aria-hidden="true">↗</span></a><a class="btn btn-text" href="#como-funciona">Conoce el sello <span aria-hidden="true">→</span></a></div>
-        <div class="hero-foot"><span class="trust-symbol">✓</span><span>Precios desglosados</span><span class="dot">•</span><span>Propina siempre voluntaria</span></div>
+        <div class="hero-foot"><span class="trust-symbol">✓</span><span>Precios totales visibles</span><span class="dot">•</span><span>Propina voluntaria, sin letra chica</span></div><div class="hero-seal"><span class="hero-seal-symbol" aria-hidden="true">✓</span><span><strong>Precios claros, decisiones libres.</strong><small>El compromiso detrás de cada carta</small></span></div>
         <div class="hero-decoration" aria-hidden="true"><span class="orb orb-one"></span><span class="orb orb-two"></span></div>
       </div>
       <div class="chat" aria-labelledby="chatTitle">
         <div class="chat-head"><div class="chat-avatar">✦</div><div><strong id="chatTitle">Asistente Precios Claro</strong><small><span class="online-dot"></span> Te ayudo a elegir dónde comer</small></div><button type="button" id="chatReset" class="icon-btn" title="Reiniciar conversación" aria-label="Reiniciar conversación">↻</button></div>
         <div class="chat-messages" id="chatMessages" aria-live="polite" aria-relevant="additions"></div>
         <div class="chat-actions" id="chatChoices"></div>
-        <div class="chat-bottom"><span class="mini-lock" aria-hidden="true">✳</span> Sin IA de pago · Solo datos registrados</div>
+        <div class="chat-bottom"><span class="mini-lock" aria-hidden="true">✳</span> Respuestas basadas en cartas registradas · Datos de ejemplo</div>
       </div>
     </section>
+
+    <section class="value-bar" aria-label="Lo que propone Precios Claro"><div class="container value-bar-grid">
+      <div class="value-item"><span class="value-icon" aria-hidden="true">◎</span><span><strong>Elige según tu presupuesto</strong><small>Antes de caminar hasta el local</small></span></div>
+      <div class="value-item"><span class="value-icon" aria-hidden="true">≋</span><span><strong>Conoce el total real</strong><small>Impuestos y cargos obligatorios visibles</small></span></div>
+      <div class="value-item"><span class="value-icon" aria-hidden="true">✓</span><span><strong>Consulta información revisada</strong><small>Cuando el sello esté validado</small></span></div>
+    </div></section>
 
     <section id="explorar" class="catalog">
       <div class="container">
@@ -61,16 +67,43 @@
       </div>
     </section>
 
-    <section id="como-funciona" class="info-section"><div class="container"><div class="section-heading info-title"><div><span class="eyebrow eyebrow-dark">TRANSPARENCIA PRIMERO</span><h2>¿Qué significa “Precios Claro”?</h2><p>La propuesta busca que los jóvenes puedan comparar precios de forma informada, sin cobros inesperados.</p></div></div>
-      <div class="info-grid">
-        <article class="info-card"><span class="info-icon">01 ↗</span><h3>Precio total visible</h3><p>Se informa el precio con impuestos y los cargos obligatorios registrados. La propina voluntaria se muestra aparte.</p></article>
-        <article class="info-card"><span class="info-icon">02 ↗</span><h3>Carta actualizable</h3><p>El editor permite añadir locales, cambiar platos, montos, disponibilidad y enlaces a sus cartas. Con Firebase conectado, se publican sin modificar GitHub.</p></article>
-        <article class="info-card"><span class="info-icon">03 ↗</span><h3>Verificación con respaldo</h3><p>Para un uso real, cada precio debe tener una fuente, fecha de revisión y proceso de validación.</p></article>
+    <section id="como-funciona" class="info-section" aria-labelledby="initiativeTitle">
+      <div class="container">
+        <div class="initiative-intro">
+          <div><span class="eyebrow eyebrow-dark">MÁS QUE UN PRECIO, UN COMPROMISO</span>
+            <h2 id="initiativeTitle">Un sello para comer<br><em>con las cuentas claras.</em></h2></div>
+          <p><strong>Precios Claro</strong> es una iniciativa que propone un acuerdo simple entre locales de comida y jóvenes: mostrar información completa y comprobable para elegir sin cargos inesperados. No se trata de prometer los precios más bajos, sino de saber lo que realmente vas a pagar.</p>
+        </div>
+        <div class="info-grid">
+          <article class="info-card">
+            <div class="info-card-top"><span class="info-icon" aria-hidden="true">01</span><span class="info-glyph" aria-hidden="true">🤝</span></div>
+            <h3>El local se compromete</h3>
+            <p>Los negocios que quieran sumarse aceptarían publicar sus cartas y precios completos, con condiciones claras para cualquier persona antes de visitarles.</p>
+            <span class="info-tag">Adhesión voluntaria</span>
+          </article>
+          <article class="info-card">
+            <div class="info-card-top"><span class="info-icon" aria-hidden="true">02</span><span class="info-glyph" aria-hidden="true">🧾</span></div>
+            <h3>El total va por delante</h3>
+            <p>Los montos publicados incluirían impuestos y cargos obligatorios. Cualquier propina sugerida se informaría aparte, porque la decisión es tuya.</p>
+            <span class="info-tag">Sin cobros escondidos</span>
+          </article>
+          <article class="info-card">
+            <div class="info-card-top"><span class="info-icon" aria-hidden="true">03</span><span class="info-glyph" aria-hidden="true">🔎</span></div>
+            <h3>El sello se revisa</h3>
+            <p>El equipo verificaría la carta y dejaría constancia de la fuente y fecha de revisión. Si el precio cambia o la revisión vence, el sello debe actualizarse.</p>
+            <span class="info-tag">Vigencia y respaldo</span>
+          </article>
+        </div>
+        <div class="initiative-promise">
+          <div class="promise-mark" aria-hidden="true">✓</div>
+          <div><span class="eyebrow">LA IDEA DETRÁS DEL SELLO</span><h3>Que nadie tenga que adivinar cuánto cuesta salir a comer.</h3><p>Un joven compara. Un local informa. Ambos ganan confianza.</p></div>
+          <a class="btn btn-promise" href="#explorar">Explorar opciones <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="demo-clarification"><span aria-hidden="true">ⓘ</span> <strong>Etapa académica:</strong> por ahora, todos los restaurantes, cartas, precios y sellos mostrados son ficticios. El proceso de adhesión y verificación es una propuesta todavía no implementada con locales reales.</p>
       </div>
-      <div class="disclaimer"><span class="disclaimer-mark">!</span><p><strong>Importante:</strong> esta web es una demostración académica. Los restaurantes, ubicaciones estimadas, cartas, precios y sellos son ficticios. No tomes decisiones de compra basadas en estos ejemplos.</p></div>
-    </div></section>
+    </section>
   </main>
-  <footer class="footer"><div class="container footer-content"><div><strong>precios<span>claro</span></strong><small>Proyecto universitario · Versión demostrativa</small></div><span>Comer bien también es saber cuánto vas a pagar. ♡</span><button type="button" id="footerAdmin" class="footer-admin">Editar datos ↗</button></div></footer>
+  <footer class="footer"><div class="container footer-content"><div><strong>precios<span>claro</span></strong><small>Iniciativa estudiantil · Etapa de validación</small></div><span>Comer bien también es saber cuánto vas a pagar. ♡</span><button type="button" id="footerAdmin" class="footer-admin">Acceso del equipo ↗</button></div></footer>
 
   <div class="overlay" id="detailOverlay" hidden><div class="backdrop" data-close="detail"></div><section class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><button type="button" class="modal-close" id="closeDetail" aria-label="Cerrar carta">✕</button><div id="detailContent"></div></section></div>
 
@@ -78,22 +111,25 @@
     <div class="backdrop" data-close="admin"></div>
     <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
       <div class="admin-head"><div>
-        <span class="eyebrow">PANEL DE EDICIÓN · PRECIOS CLARO</span>
-        <h2 id="adminTitle">Gestionar locales y cartas</h2>
-        <p id="adminInstructions">Si conectas Firebase, los cambios se guardarán en la nube y serán visibles para todos automáticamente.</p>
+        <span class="eyebrow">ESPACIO PRIVADO · EQUIPO PRECIOS CLARO</span>
+        <h2 id="adminTitle">Gestión de locales y cartas</h2>
+        <p id="adminInstructions">Acceso reservado a cuentas autorizadas. Los cambios publicados se sincronizan automáticamente.</p>
       </div><button type="button" id="closeAdmin" class="modal-close admin-close" aria-label="Cerrar panel editor">✕</button></div>
 
       <div id="adminGate" class="admin-gate" hidden>
         <div class="admin-login-card">
-          <div class="gate-lock">🔐</div>
-          <h3>Acceso para editores</h3>
-          <p id="adminGateMessage">Solo el equipo autorizado puede modificar los precios publicados.</p>
+          <div class="gate-lock" aria-hidden="true">♙</div>
+          <span class="gate-label">ÁREA RESTRINGIDA</span>
+          <h3>Solo para el equipo</h3>
+          <p id="adminGateMessage">Para editar cartas y precios necesitas una cuenta aprobada por los administradores.</p>
           <form id="adminLoginForm" class="login-form">
             <label>Correo electrónico <input id="adminEmail" type="email" autocomplete="username" required placeholder="editor@ejemplo.cl"></label>
             <label>Contraseña <input id="adminPassword" type="password" autocomplete="current-password" required placeholder="Tu contraseña"></label>
             <button class="btn btn-primary" type="submit" id="adminLoginButton">Entrar al panel</button>
           </form>
           <button type="button" id="unauthorizedLogout" class="btn btn-text" hidden>Cerrar sesión</button>
+          <a class="gate-help" href="https://github.com/jmarchantvillegas-hub/precios-claro/blob/main/GUIA_FIREBASE.md" target="_blank" rel="noopener noreferrer">¿Eres parte del equipo? Consulta cómo activar tu acceso ↗</a>
+          <p class="gate-secure-note">Las claves no se almacenan en esta página. La autorización se comprueba con Firebase.</p>
         </div>
       </div>
 

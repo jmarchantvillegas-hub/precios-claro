@@ -57,8 +57,9 @@
   function updatePreviewLabel(){
     const strip=document.querySelector('.demo-strip');
     if(!strip) return;
-    strip.textContent='✦ PROTOTIPO UNIVERSITARIO · Todos los locales iniciales son ficticios · Ningún sello inicial es real' +
-      (cloudConfigured ? (cloudHasCatalog ? ' · CATÁLOGO COMPARTIDO ONLINE' : ' · DEMO LOCAL HASTA PUBLICAR EN FIREBASE') : (hasDraft()?' · VISTA PREVIA DE CAMBIOS LOCALES':''));
+    const text='Iniciativa en etapa piloto · Locales, cartas y precios ficticios (sin certificación real)';
+    const extra=cloudConfigured && cloudHasCatalog ? ' · Catálogo compartido online' : '';
+    strip.textContent=text+extra;
   }
   function hasDraft(){try{return !!localStorage.getItem(KEY);}catch{return false;}}
   function showToast(text,problem=false){
@@ -182,7 +183,7 @@
   function openAdmin(){
     $('adminOverlay').hidden=false;document.body.style.overflow='hidden';
     refreshCloudUi();
-    if (!cloudConfigured || cloudIsAdmin) {
+    if (cloudConfigured && cloudIsAdmin) {
       if(!editing){selectEditorPlace(db.places[0]?.id || null);}
       else{renderAdminList();renderEditor();}
     }
@@ -256,7 +257,9 @@
     return obj;
   }
   async function saveEditor(event){
-    event.preventDefault();const result=readEditor();if(!result)return;
+    event.preventDefault();
+    if(!cloudConfigured || !cloudIsAdmin || !cloudReady){showToast('Acceso de edición no autorizado.',true);return;}
+    const result=readEditor();if(!result)return;
     const next=clone(db);
     const i=next.places.findIndex(p=>p.id===result.id);
     if(i===-1)next.places.push(result);else next.places[i]=result;
@@ -271,6 +274,7 @@
     showToast(cloudConfigured?'Publicado para todos correctamente.':'Borrador guardado correctamente.');
   }
   async function deleteEditor(){
+    if(!cloudConfigured || !cloudIsAdmin || !cloudReady){showToast('Acceso de edición no autorizado.',true);return;}
     if(!activeEditId)return;
     if(!window.confirm(`¿Eliminar “${editing.name}” ${cloudConfigured?'de la base online para todos':'del borrador local'}?`))return;
     const next=clone(db);next.places=next.places.filter(x=>x.id!==activeEditId);
@@ -303,6 +307,7 @@
   }
   function jsonExport(){ downloadFile('precios-claro-respaldo.json',JSON.stringify(db,null,2),'application/json;charset=utf-8');showToast('Respaldo JSON descargado.'); }
   async function jsonImport(event){
+    if(!cloudConfigured || !cloudIsAdmin || !cloudReady){showToast('Acceso de edición no autorizado.',true);return;}
     const file=event.target.files?.[0];event.target.value='';if(!file)return;
     if(file.size>2000000){alertAdmin('El archivo supera el límite de 2 MB.');return;}
     try{
@@ -328,26 +333,33 @@
     const el=$('syncStatus');el.textContent=message;el.dataset.state=state;
   }
   function refreshCloudUi(){
-    $('adminGate').hidden=!cloudConfigured || cloudIsAdmin;
-    $('adminContent').hidden=cloudConfigured && !cloudIsAdmin;
-    $('exportJs').hidden=cloudConfigured;
-    $('restoreDemo').hidden=cloudConfigured;
+    // Sin Firebase no se habilita ningún formulario de edición público.
+    // En línea, la seguridad real reside en Authentication + Firestore Rules.
+    const permitted=cloudConfigured && cloudIsAdmin;
+    $('adminGate').hidden=permitted;
+    $('adminContent').hidden=!permitted;
+    $('exportJs').hidden=true;
+    $('restoreDemo').hidden=true;
     $('seedCloud').hidden=!cloudConfigured || !cloudIsAdmin || !cloudReady || cloudHasCatalog;
     $('editorSession').hidden=!cloudConfigured || !cloudIsAdmin;
     $('editorIdentity').textContent=cloudEmail ? `Editor: ${cloudEmail}` : 'Editor autorizado';
     $('adminInstructions').textContent=cloudConfigured
-      ? 'Al guardar, los cambios se publican en Firebase y aparecen para todos los visitantes. Solo ingresan editores autorizados.'
-      : 'Modo local de ejemplo. Para publicar automáticamente, sigue la guía de conexión a Firebase.';
+      ? 'Solo los editores autorizados pueden publicar cambios. Las cartas se actualizan para todos al guardar.'
+      : 'El acceso de edición está bloqueado hasta conectar Firebase Authentication y activar las reglas de seguridad.';
     const info=$('adminGateMessage');
-    if(!cloudApi){
-      info.textContent='Conectando al sistema de acceso seguro…';
+    if(!cloudConfigured){
+      info.textContent='El acceso está protegido. Para crear las claves del equipo hay que terminar la configuración de Firebase; no existe una contraseña pública de demostración.';
+    }else if(!cloudApi){
+      info.textContent='Conectando con el servicio de acceso seguro…';
     }else if(cloudEmail && !cloudIsAdmin){
       info.textContent=`La cuenta ${cloudEmail} inició sesión, pero no está autorizada para editar. Comprueba que en Firebase exista admins/{UID} con active = true.`;
     }else{
       info.textContent='Ingresa con un usuario creado por tu equipo en Firebase Authentication. No está habilitado el registro público.';
     }
-    $('adminLoginForm').hidden=cloudEmail && !cloudIsAdmin;
+    $('adminLoginForm').hidden=Boolean(cloudEmail && !cloudIsAdmin);
     $('unauthorizedLogout').hidden=!cloudEmail || cloudIsAdmin;
+    $('adminEmail').disabled=!cloudConfigured || !cloudApi;
+    $('adminPassword').disabled=!cloudConfigured || !cloudApi;
     $('adminLoginButton').disabled=cloudLoginPending || !cloudApi;
     if(cloudConfigured && cloudIsAdmin && !cloudHasCatalog){
       alertAdmin('El catálogo online todavía está vacío. Pulsa “Publicar locales de ejemplo” para cargar los ocho restaurantes ficticios.');
@@ -418,7 +430,7 @@
     },{once:true});
     if(window.PC_CLOUD)onCloudReady();
   }else{
-    setSyncStatus('● Modo local','waiting');
+    setSyncStatus('◌ Catálogo de muestra','waiting');
   }
   $('adminLoginForm').addEventListener('submit',async e=>{
     e.preventDefault();if(!cloudApi)return;
