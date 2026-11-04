@@ -53,6 +53,7 @@
   }
   let cloudApi = null, cloudReady = false, cloudHasCatalog = false, cloudRevision = 0;
   let cloudIsAdmin = false, cloudEmail = '', cloudLoginPending = false, cloudLoginError = '';
+  let cloudAuthStatus = '', cloudAuthError = '', cloudAuthUid = '', cloudAuthProject = '', cloudActiveType = '';
   let editingRevision = 0;
   let activePlaceId = null;
   let selectedDishId = null;
@@ -404,13 +405,26 @@
     }else if(!cloudApi){
       info.textContent='Conectando con el servicio de acceso seguro…';
     }else if(cloudEmail && !cloudIsAdmin){
-      info.textContent=`La cuenta ${cloudEmail} inició sesión, pero no está autorizada para editar. Comprueba que en Firebase exista admins/{UID} con active = true.`;
+      const path = `admins/${cloudAuthUid || '[UID]'}`;
+      const suffix = ` Proyecto: ${cloudAuthProject || 'no indicado'}. Documento consultado: ${path}.`;
+      if (cloudAuthStatus === 'missing') {
+        info.textContent = 'Firebase no encontró el documento de autorización.' + suffix;
+      } else if (cloudAuthStatus === 'inactive') {
+        info.textContent = 'Firebase encontró tu documento, pero active está en false. Cámbialo a boolean true.' + suffix;
+      } else if (cloudAuthStatus === 'invalid-value') {
+        info.textContent = `Firebase encontró el documento, pero active tiene un valor de tipo ${cloudActiveType || 'desconocido'}; debe ser boolean true.` + suffix;
+      } else if (cloudAuthStatus === 'read-error') {
+        info.textContent = `No se pudo consultar el permiso en Firestore: ${cloudAuthError}.` + suffix + ' Comprueba que las reglas estén publicadas en este mismo proyecto.';
+      } else {
+        info.textContent = 'La cuenta inició sesión, pero aún no se ha validado el permiso. Pulsa «Verificar permisos».';
+      }
     }else{
       info.textContent='Inicia sesión como cristinix o con el correo de un editor autorizado. Las cuentas se crean solo desde Firebase.';
     }
     if (cloudConfigured && cloudLoginError) info.textContent=cloudLoginError;
     $('adminLoginForm').hidden=Boolean(cloudEmail && !cloudIsAdmin);
     $('unauthorizedLogout').hidden=!cloudEmail || cloudIsAdmin;
+    $('recheckAdmin').hidden=!cloudEmail || cloudIsAdmin || !cloudApi;
     $('adminEmail').disabled=!cloudConfigured || !cloudApi;
     $('adminPassword').disabled=!cloudConfigured || !cloudApi;
     $('adminLoginButton').disabled=cloudLoginPending || !cloudApi;
@@ -465,8 +479,10 @@
         alertAdmin('No se pudo leer Firebase: '+(error?.message||error));
         showToast('No se pudo sincronizar con Firebase. Se ven datos de ejemplo, no confirmados.',true);
       },
-      onAuth({email,permitted,error}){
+      onAuth({email,uid,permitted,error,status,activeType,projectId}){
         cloudEmail=email;cloudIsAdmin=Boolean(permitted);
+        cloudAuthUid=uid || '';cloudAuthStatus=status || '';
+        cloudAuthError=error || '';cloudActiveType=activeType || '';cloudAuthProject=projectId || '';
         if(cloudIsAdmin) cloudLoginError='';
         if(error)alertAdmin('Error al comprobar permisos de editor: '+error);
         if(!cloudIsAdmin)editing=null;
@@ -508,6 +524,12 @@
   });
   $('unauthorizedLogout').addEventListener('click',async()=>{
     try{await cloudApi?.signOut();}catch(e){showToast(e.message,true);}
+  });
+  $('recheckAdmin').addEventListener('click',async()=>{
+    if(!cloudApi)return;
+    $('adminGateMessage').textContent='Comprobando el permiso directamente en Firestore…';
+    try{await cloudApi.recheckEditor();}
+    catch(e){cloudAuthError=String(e.message||e);cloudAuthStatus='read-error';refreshCloudUi();}
   });
   $('seedCloud').addEventListener('click',async()=>{
     if(cloudHasCatalog || !cloudReady || !cloudIsAdmin)return;
